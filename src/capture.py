@@ -1,8 +1,11 @@
 import cv2
 import imutils
+from src.socks.server import SocketServer
+
 
 class VideoCapture:
   def __init__(self, src=0):
+    self.sock_server = SocketServer(4444)
     self.cap = cv2.VideoCapture(src)
     self.classifier = cv2.CascadeClassifier('src/models/cars.xml')
     self.car_ratio = 0.0
@@ -10,7 +13,7 @@ class VideoCapture:
 
   def classifier_cars(self, frame):
     grayscale_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    return self.classifier.detectMultiScale(grayscale_frame, 1.05, 4)
+    return self.classifier.detectMultiScale(grayscale_frame, 1.05, 6)
 
   def execute(self):
     while True:
@@ -24,6 +27,7 @@ class VideoCapture:
         self.lasted_cars.pop(0)
 
       print('Cars:', self.lasted_cars, ' / Car ratio', round(sum(self.lasted_cars) / 15, 2), 'Veh/s')
+      self.sock_server.send(str(round(sum(self.lasted_cars) / 15, 2)))
 
       for (x,y,w,h) in vehicles_classifier:
         cv2.rectangle(resize_frame, (x,y), (x+w,y+h), (255,150,0), 1)
@@ -31,7 +35,7 @@ class VideoCapture:
       if ret is True:
         cv2.imshow('Video', resize_frame)
 
-      if cv2.waitKey(999) & 0xFF == ord('q'):
+      if cv2.waitKey(500) & 0xFF == ord('q'):
         break
 
     self.cap.release()

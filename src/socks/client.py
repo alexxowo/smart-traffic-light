@@ -11,5 +11,13 @@ class SocketClient:
   def send(self, data):
     self.sock.send(data.encode())
 
+  def receive(self):
+    data = self.sock.recv(1024)
+
+    if not data:
+      return None
+
+    return self.sock.recv(1024).decode()
+
   def close(self):
     self.sock.close()
