@@ -13,4 +13,3 @@ class SocketClient:
 
   def close(self):
     self.sock.close()
-
